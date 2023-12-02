@@ -54,18 +54,15 @@ const getGoods = () => {
             const linkValue = link.textContent;
             const category = link.dataset.field;
 
-            console.log(linkValue);
-            console.log(category);
-
             getData(linkValue, category);
         })
     });
 
-    if (window.location.pathname === '/index.html') {
+    if (viewAllBtn) {
         viewAllBtn.addEventListener('click', (e) => {
             e.preventDefault();
 
-            getData('All', undefined);
+            getData();
         })
     };
 
