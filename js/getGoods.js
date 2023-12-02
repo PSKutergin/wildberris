@@ -1,29 +1,74 @@
 const getGoods = () => {
     const links = document.querySelectorAll('.navigation-link');
+    const viewAllBtn = document.getElementById('view-all');
 
-    const getData = () => {
+    const renderGoods = (goods) => {
+        const goodsContainer = document.querySelector('.long-goods-list');
+
+        goodsContainer.innerHTML = '';
+
+        goods.forEach(good => {
+            const goodBlock = document.createElement('div');
+
+            goodBlock.classList.add('col-lg-3');
+            goodBlock.classList.add('col-sm-6');
+
+            goodBlock.innerHTML =
+                `
+                    <div class="goods-card">
+                        <span class="label ${good.label ? null : 'd-none'}">${good.label}</span>
+                        <img src="db/${good.img}" alt="${good.name}" class="goods-image">
+                        <h3 class="goods-title">${good.name}</h3>
+                        <p class="goods-description">${good.description}</p>
+                        <button class="button goods-card-btn add-to-cart" data-id="${good.id}">
+                            <span class="button-price">$${good.price}</span>
+                        </button>
+                    </div>
+                `
+
+            goodsContainer.append(goodBlock)
+        })
+    };
+
+    const getData = (value, category) => {
         fetch('https://wildberris-26b71-default-rtdb.firebaseio.com/db.json')
             .then(res => res.json())
             .then(data => {
-                localStorage.setItem('goods', JSON.stringify(data));
+                const array = category ? data.filter(item => item[category] === value) : data;
+
+                localStorage.setItem('goods', JSON.stringify(array));
+
+                if (window.location.pathname !== '/goods.html') {
+                    window.location.href = '/goods.html'
+                } else {
+                    renderGoods(array);
+                };
+
             })
     };
-
-    if (!localStorage.getItem('goods')) {
-        localStorage.setItem('goods', JSON.stringify([]))
-    }
 
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
 
-            getData();
+            const linkValue = link.textContent;
+            const category = link.dataset.field;
 
-            const goods = JSON.parse(localStorage.getItem('goods'))
-
-            console.log(goods);
+            getData(linkValue, category);
         })
     });
+
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            getData();
+        })
+    };
+
+    if (localStorage.getItem('goods') && window.location.pathname === '/goods.html') {
+        renderGoods(JSON.parse(localStorage.getItem('goods')));
+    };
 };
 
 getGoods();
